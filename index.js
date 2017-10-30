@@ -32,6 +32,13 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     });
 }
 
+setInterval(()=>{
+    context.drawImage(video, 0, 0, 640, 480);
+    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    var data = imageData.data;
+    var buffer = data.buffer; // arraybuffer
+    sendBuffer(buffer)
+}, 1000)
 
 document.getElementById("snap").addEventListener("click", function() {
     context.drawImage(video, 0, 0, 640, 480);
