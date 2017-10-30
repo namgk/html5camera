@@ -2,20 +2,17 @@
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 var video = document.getElementById('video');
+var server = 'ws://localhost:1880/ws/test'
 
 var connection = {}
 function connect() {
     if(window.WebSocket != undefined) {
         if(connection.readyState === undefined || connection.readyState > 1)
         {
-            connection = new WebSocket('ws://localhost:1880/ws/test');
-            connection.onopen = onopen
+            connection = new WebSocket(server);
             connection.binaryType = 'arraybuffer';
         }
     }
-}
-function onopen (event) {
-    sendBuffer('hi server')
 }
 function sendBuffer(b) {
     connection.send(b);
@@ -28,7 +25,6 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
         video.src = window.URL.createObjectURL(stream);
         video.play();
-
     });
 }
 
@@ -39,15 +35,6 @@ setInterval(()=>{
     var buffer = data.buffer; // arraybuffer
     sendBuffer(buffer)
 }, 1000)
-
-document.getElementById("snap").addEventListener("click", function() {
-    context.drawImage(video, 0, 0, 640, 480);
-    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    var data = imageData.data;
-    var buffer = data.buffer; // arraybuffer
-    sendBuffer(buffer)
-    console.log(data)
-});
 
 
 /* Legacy code below: getUserMedia 

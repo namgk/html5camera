@@ -2,9 +2,50 @@
 <head>
 </head>
 <body>
-<video id="video" width="640" height="480" autoplay></video>
-<button id="snap">Snap Photo</button>
-<canvas id="canvas" width="640" height="480"></canvas>
-<script src="index.js"></script>
+	<video id="video" width="0" height="0" autoplay></video>
+	<canvas id="canvas" width="640" height="480"></canvas>
+	<script>
+		var canvas = document.getElementById('canvas');
+		var context = canvas.getContext('2d');
+		var video = document.getElementById('video');
+		var server = 'ws://localhost:1880/ws/test'
+
+		var connection = {}
+		function connect() {
+	    if(window.WebSocket != undefined) {
+        if(connection.readyState === undefined || connection.readyState > 1){
+          connection = new WebSocket(server);
+          connection.onopen = onOpen
+          connection.binaryType = 'arraybuffer';
+        }
+	    }
+		}
+
+		function onOpen(){
+			// Get access to the camera!
+			if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+		    // Not adding `{ audio: true }` since we only want video now
+		    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+	        video.src = window.URL.createObjectURL(stream);
+	        video.play();
+		    });
+			}
+
+			setInterval(()=>{
+		    context.drawImage(video, 0, 0, 640, 480);
+		    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+		    var data = imageData.data;
+		    var buffer = data.buffer; // arraybuffer
+		    sendBuffer(buffer)
+			}, 1000)
+		}
+
+		function sendBuffer(b) {
+	    connection.send(b);
+		}
+		
+		connect()
+
+	</script>
 </body>
 </html>
